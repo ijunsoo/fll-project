@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Kakao Map with My Location</title>
+    <style>
+        #map {
+            width: 100%;
+            height: 500px;
+        }
+    </style>
+</head>
+<body>
+    <h1>내 위치로 지도 표시</h1>
+    <div id="map"></div>
+
+    <script>
+        // Kakao Maps API 스크립트 동적으로 로드
+        const script = document.createElement('script');
+        script.type = "text/javascript";
+        script.src = "https://dapi.kakao.com/v2/maps/sdk.js?autoload=false&appkey=01544cba51e9151764f5af8a7637154d&libraries=services";
+        
+        // 스크립트 로드가 완료된 후 kakao.maps.load() 함수 호출
+        script.onload = function () {
+            kakao.maps.load(function() {
+                geoFindMe();  // Kakao Maps 객체를 사용한 geoFindMe 함수 호출
+            });
+        };
+
+        document.body.appendChild(script);
+
+        // geoFindMe 함수 - 위치 정보 가져오기 및 지도 표시
+        function geoFindMe() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    var lat = position.coords.latitude;
+                    var lon = position.coords.longitude;
+                    var locPosition = new kakao.maps.LatLng(lat, lon);
+
+                    var mapContainer = document.getElementById('map');
+                    var mapOption = {
+                        center: locPosition,  // 지도 중심을 내 위치로 설정
+                        level: 3  // 확대 레벨 설정
+                    };
+
+                    var map = new kakao.maps.Map(mapContainer, mapOption);
+
+                    // 1. 작은 파란색 원 생성 (테두리만)
+                    var outerCircle = new kakao.maps.Circle({
+                        center: locPosition,  // 원의 중심
+                        radius: 15,  // 원의 반지름 (30px)
+                        strokeWeight: 3,  // 원 테두리 두께
+                        strokeColor: '#0000FF',  // 원 테두리 색상 (파란색)
+                        strokeOpacity: 0.8,  // 원 테두리 투명도
+                        fillColor: '#0000FF',  // 원 내부 색상 (파란색)
+                        fillOpacity: 0.2  // 원 내부 투명도
+                    });
+
+                    // 2. 작은 불투명한 원 생성 (내부 원)
+                    var innerCircle = new kakao.maps.Circle({
+                        center: locPosition,  // 원의 중심
+                        radius: 10,  // 원의 반지름 (10px)
+                        strokeWeight: 0,  // 테두리 없음
+                        fillColor: '#0000FF',  // 원 내부 색상 (파란색)
+                        fillOpacity: 0.5  // 원 내부 투명도 (불투명한 파란색)
+                    });
+
+                    // 지도에 원 추가
+                    outerCircle.setMap(map);
+                    innerCircle.setMap(map);
+
+                    // 지도 중심을 내 위치로 설정
+                    map.setCenter(locPosition);
+                }, function(error) {
+                    console.error("위치를 가져올 수 없습니다:", error);
+                    alert("위치를 가져오는 데 실패했습니다.");
+                });
+            } else {
+                alert("Geolocation을 지원하지 않는 브라우저입니다.");
+            }
+        }
+    </script>
+</body>
+</html>
